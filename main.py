@@ -4,8 +4,7 @@ import pygame
 import colors
 
 
-from numpy import array_equal
-from maze import Maze, Wall
+from maze import Maze, MazeWall
 from player import Player
 from constants import BLOCK_SIZE, M, N, SCREEN_WIDTH, SCREEN_HEIGHT
 
@@ -19,9 +18,9 @@ def init():
 def fill_walls():
     x = y = 0
     for row in layout:
-        for col in row:
-            if array_equal(col, colors.BLACK):
-                walls.append(Wall((x, y)))
+        for cell in row:
+            if cell == 1:
+                walls.append(MazeWall((x, y)))
             x += BLOCK_SIZE
         
         y += BLOCK_SIZE
@@ -70,10 +69,10 @@ def save():
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 walls = []
-maze = Maze()
+maze = Maze(M, N)
 player = Player(walls)
 end_rect = pygame.Rect(SCREEN_WIDTH-2*BLOCK_SIZE, SCREEN_HEIGHT-2*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
-layout = maze.generate(M, N)
+layout = maze.generate()
 
 
 def main():
