@@ -12,4 +12,8 @@ Install required libraries: ``pip install -r requirements.txt``
 
 Launch: ``main.py``
 
-Change maze's width and height: ``constants.py > M, N``
+Change maze's width and height: ``constants.py > ROWS, COLUMNS``
+
+Example maze (40 rows, 60 columns):
+
+![maze](https://user-images.githubusercontent.com/28676554/158453045-26450675-2ee6-415a-979d-d63f2934f2fe.png)
