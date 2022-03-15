@@ -15,8 +15,10 @@ def init():
     pygame.display.set_caption("Maze generator by artandfi")
 
 
-def fill_walls():
+def fill_walls(layout):
+    walls = []
     x = y = 0
+
     for row in layout:
         for cell in row:
             if cell == 1:
@@ -25,10 +27,20 @@ def fill_walls():
         
         y += BLOCK_SIZE
         x = 0
+    
+    return walls
 
 
 def run():
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    clock = pygame.time.Clock()
+    maze = Maze(M, N)
+    layout = maze.generate()
+    walls = fill_walls(layout)
+    player = Player(walls)
+    end_rect = pygame.Rect(SCREEN_WIDTH-2*BLOCK_SIZE, SCREEN_HEIGHT-2*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
     running = True
+    
     while running:
         clock.tick(60)
     
@@ -60,26 +72,13 @@ def run():
         pygame.draw.rect(screen, colors.GREEN, player.rect)
         pygame.display.flip()
         clock.tick(360)
-
-
-def save():
+    
     maze.save_maze()
-
-
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-clock = pygame.time.Clock()
-walls = []
-maze = Maze(M, N)
-player = Player(walls)
-end_rect = pygame.Rect(SCREEN_WIDTH-2*BLOCK_SIZE, SCREEN_HEIGHT-2*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
-layout = maze.generate()
 
 
 def main():
     init()
-    fill_walls()
     run()
-    save()
     pygame.quit()
 
 

@@ -129,7 +129,7 @@ class Maze:
         Image.fromarray(self.scale_layout(scale), "RGB").save(file_name, "png")
     
     def scale_layout(self, scale):
-        """Scale maze."""
+        """Scale maze's layout."""
         layout = self.layout_rgb()
         return layout.repeat(scale, axis=0).repeat(scale, axis=1)
 
