@@ -17,3 +17,7 @@ Change maze's width and height: ``constants.py > ROWS, COLUMNS``
 Example maze (40 rows, 60 columns):
 
 ![maze](https://user-images.githubusercontent.com/28676554/158453045-26450675-2ee6-415a-979d-d63f2934f2fe.png)
+
+Example solved maze (40 rows, 60 columns):
+
+![maze](https://user-images.githubusercontent.com/28676554/158602954-64d3e254-cc79-4cf1-a087-50466bd3f1a8.png)
