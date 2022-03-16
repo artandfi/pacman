@@ -5,8 +5,8 @@ from random import randint
 from pygame import Rect
 from PIL import Image
 from constants import BLOCK_SIZE, UP, RIGHT, FLOOR, WALL
-from colors import BLACK, GREEN, RED, WHITE
-
+from colors import BLACK, BLUE, GREEN, RED, WHITE
+from solver import MazeAStarCell
 
 opposite = lambda d: d - 1 if d % 2 else d + 1
 
@@ -109,28 +109,29 @@ class Maze:
             pos + 1 if (pos + 1) % self.height != 0 else -1
         ]
     
-    def layout_rgb(self):
+    def layout_rgb(self, path=None):
         height, width = len(self.layout), len(self.layout[0])
         layout = np.zeros((height, width, 3), dtype=np.uint8)
 
         for i, row in enumerate(self.layout):
-            for j, cell in enumerate(row):
+            for j, _ in enumerate(row):
                 if self.layout[i][j] == WALL:
                     layout[i][j] = BLACK
                 else:
-                    layout[i][j] = WHITE
+                    cell = MazeAStarCell(i, j, True)
+                    layout[i][j] = BLUE if path and cell in path else WHITE
         
         layout[1][1] = GREEN
         layout[height-2][width-2] = RED
         return layout
 
-    def save_maze(self, file_name="./media/maze.png", scale=3):
+    def save_maze(self, file_name="./media/maze.png", scale=3, path=None):
         """Save maze as image file in subdirectory."""
-        Image.fromarray(self.scale_layout(scale), "RGB").save(file_name, "png")
+        Image.fromarray(self.scale_layout(scale, path), "RGB").save(file_name, "png")
     
-    def scale_layout(self, scale):
+    def scale_layout(self, scale, path=None):
         """Scale maze's layout."""
-        layout = self.layout_rgb()
+        layout = self.layout_rgb(path)
         return layout.repeat(scale, axis=0).repeat(scale, axis=1)
 
 

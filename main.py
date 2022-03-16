@@ -53,7 +53,7 @@ def run():
     maze = Maze(COLUMNS, ROWS)
     layout = maze.generate()
     solver = MazeSolverAStar(maze)
-    start_cell, end_cell, path = solver.solve()
+    start_cell, end_cell, path = None, None, None
     walls = fill_walls(layout)
     player = Player(walls)
     end_rect = pygame.Rect(SCREEN_WIDTH-2*BLOCK_SIZE, SCREEN_HEIGHT-2*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
@@ -100,10 +100,11 @@ def run():
             chosen = True
             if choice == A_STAR:
                 draw = True
+                start_cell, end_cell, path = solver.solve()
         
         clock.tick(360)
     
-    maze.save_maze()
+    maze.save_maze(path=path)
 
 
 def main():
