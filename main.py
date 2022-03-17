@@ -39,14 +39,6 @@ def fill_walls(layout):
     return walls
 
 
-def draw_path(path, start_cell, end_cell, screen):
-    cell = path[start_cell]
-    while cell != end_cell:
-        rect = pygame.Rect(cell.y*BLOCK_SIZE, cell.x*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
-        pygame.draw.rect(screen, colors.BLUE, rect)
-        cell = path[cell]
-
-
 def move(player, end_rect):
     key = pygame.key.get_pressed()
     if key[pygame.K_LEFT]:
@@ -74,6 +66,30 @@ def draw_endpoints(screen, player_rect, end_rect):
     pygame.draw.rect(screen, colors.GREEN, player_rect)
 
 
+def draw_path(path, start_cell, end_cell, screen):
+    cell = path[start_cell]
+
+    while cell != end_cell:
+        rect = pygame.Rect(cell.y*BLOCK_SIZE, cell.x*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
+        pygame.draw.rect(screen, colors.YELLOW, rect)
+        
+        cell = path[cell]
+
+
+def traverse_path(path, start_cell, end_cell, player):
+    cell = path[start_cell]
+
+    while cell != end_cell:
+        player.rect.x, player.rect.y = cell.y * BLOCK_SIZE, cell.x * BLOCK_SIZE
+        cell = path[cell]
+
+def traverse_path_step(path, current_cell, player):
+    cell = path[current_cell]
+    player.rect.x, player.rect.y = cell.y * BLOCK_SIZE, cell.x * BLOCK_SIZE
+    
+    return cell
+
+
 def run():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
@@ -83,7 +99,8 @@ def run():
     walls = fill_walls(layout)
     player = Player(walls)
     end_rect = pygame.Rect(SCREEN_WIDTH-2*BLOCK_SIZE, SCREEN_HEIGHT-2*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
-    
+    path_cell = None
+
     running = True
     auto_draw = False
     chosen = False
@@ -100,7 +117,9 @@ def run():
         
         if auto_draw:
             draw_path(path, start_cell, end_cell, screen)
-        
+            if path_cell != end_cell:
+                path_cell = traverse_path_step(path, path_cell, player)
+
         draw_endpoints(screen, player.rect, end_rect)
         pygame.display.flip()
 
@@ -113,7 +132,8 @@ def run():
             if choice != BY_HAND:
                 auto_draw = True
                 start_cell, end_cell, path = solvers[choice](maze).solve()
-
+                path_cell = start_cell
+        
         clock.tick(360)
     
     maze.save_maze(path=path)

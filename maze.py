@@ -5,7 +5,7 @@ from random import randint
 from pygame import Rect
 from PIL import Image
 from constants import BLOCK_SIZE, UP, RIGHT, FLOOR, WALL
-from colors import BLACK, BLUE, GREEN, RED, WHITE
+from colors import BLACK, GREEN, RED, WHITE, YELLOW
 from solver import MazeAStarCell
 
 opposite = lambda d: d - 1 if d % 2 else d + 1
@@ -119,7 +119,7 @@ class Maze:
                     layout[i][j] = BLACK
                 else:
                     cell = MazeAStarCell(i, j, True)
-                    layout[i][j] = BLUE if path and cell in path else WHITE
+                    layout[i][j] = YELLOW if path and cell in path else WHITE
         
         layout[1][1] = GREEN
         layout[height-2][width-2] = RED
