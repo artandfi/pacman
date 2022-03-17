@@ -8,7 +8,7 @@ import easygui
 from maze import Maze, MazeWall
 from player import Player
 from constants import BLOCK_SIZE, ROWS, COLUMNS, SCREEN_HEIGHT, SCREEN_WIDTH, SPEED, WALL, A_STAR, GREEDY, BY_HAND
-from solver import MazeSolverAStar
+from solver import MazeSolverAStar, MazeSolverGreedy
 
 
 def init():
@@ -47,61 +47,73 @@ def draw_path(path, start_cell, end_cell, screen):
         cell = path[cell]
 
 
+def move(player, end_rect):
+    key = pygame.key.get_pressed()
+    if key[pygame.K_LEFT]:
+        player.move(-SPEED, 0)
+    if key[pygame.K_RIGHT]:
+        player.move(SPEED, 0)
+    if key[pygame.K_UP]:
+        player.move(0, -SPEED)
+    if key[pygame.K_DOWN]:
+        player.move(0, SPEED)
+
+    if player.rect.colliderect(end_rect):
+        pygame.quit()
+        sys.exit()
+
+
+def draw_maze(screen, walls):
+    screen.fill(colors.WHITE)
+    for wall in walls.values():
+        pygame.draw.rect(screen, colors.BLACK, wall.rect)
+
+
+def draw_endpoints(screen, player_rect, end_rect):
+    pygame.draw.rect(screen, colors.RED, end_rect)
+    pygame.draw.rect(screen, colors.GREEN, player_rect)
+
+
 def run():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
     maze = Maze(COLUMNS, ROWS)
     layout = maze.generate()
-    solver = MazeSolverAStar(maze)
     start_cell, end_cell, path = None, None, None
     walls = fill_walls(layout)
     player = Player(walls)
     end_rect = pygame.Rect(SCREEN_WIDTH-2*BLOCK_SIZE, SCREEN_HEIGHT-2*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
+    
     running = True
-    draw = False
+    auto_draw = False
     chosen = False
     
     while running:
         clock.tick(60)
 
         for e in pygame.event.get():
-            if e.type == pygame.QUIT:
-                running = False
-            if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
+            if e.type == pygame.QUIT or e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
                 running = False
 
-        key = pygame.key.get_pressed()
-        if key[pygame.K_LEFT]:
-            player.move(-SPEED, 0)
-        if key[pygame.K_RIGHT]:
-            player.move(SPEED, 0)
-        if key[pygame.K_UP]:
-            player.move(0, -SPEED)
-        if key[pygame.K_DOWN]:
-            player.move(0, SPEED)
-
-        if player.rect.colliderect(end_rect):
-            pygame.quit()
-            sys.exit()
-
-        screen.fill(colors.WHITE)
-        for wall in walls.values():
-            pygame.draw.rect(screen, colors.BLACK, wall.rect)
+        move(player, end_rect)
+        draw_maze(screen, walls)
         
-        if draw:
+        if auto_draw:
             draw_path(path, start_cell, end_cell, screen)
         
-        pygame.draw.rect(screen, colors.RED, end_rect)
-        pygame.draw.rect(screen, colors.GREEN, player.rect)
+        draw_endpoints(screen, player.rect, end_rect)
         pygame.display.flip()
 
         if not chosen:
-            choice = prompt()
+            solvers = [MazeSolverAStar, MazeSolverGreedy]
+            choices = ["A* (automatic)", "Greedy (automatic)", "On my own!"]
+            choice = choices.index(easygui.buttonbox("How do you wanna solve the generated maze?", choices=choices))
             chosen = True
-            if choice == A_STAR:
-                draw = True
-                start_cell, end_cell, path = solver.solve()
-        
+
+            if choice != BY_HAND:
+                auto_draw = True
+                start_cell, end_cell, path = solvers[choice](maze).solve()
+
         clock.tick(360)
     
     maze.save_maze(path=path)

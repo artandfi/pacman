@@ -16,4 +16,4 @@ A_STAR = 0
 GREEDY = 1
 BY_HAND = 2
 
-SPEED = 2
+SPEED = 5
