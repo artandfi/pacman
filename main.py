@@ -39,7 +39,7 @@ def fill_walls(layout):
     return walls
 
 
-def move(player, end_rect):
+def move(player, end_rect, by_hand):
     key = pygame.key.get_pressed()
     if key[pygame.K_LEFT]:
         player.move(-SPEED, 0)
@@ -50,9 +50,12 @@ def move(player, end_rect):
     if key[pygame.K_DOWN]:
         player.move(0, SPEED)
 
-    if player.rect.colliderect(end_rect):
-        pygame.quit()
-        sys.exit()
+    end_reached = player.rect.colliderect(end_rect)
+
+    if end_reached and by_hand:
+        easygui.msgbox("You win!", "You win!")
+
+    return end_reached
 
 
 def draw_maze(screen, walls):
@@ -66,25 +69,21 @@ def draw_endpoints(screen, player_rect, end_rect):
     pygame.draw.rect(screen, colors.GREEN, player_rect)
 
 
-def draw_path(path, start_cell, end_cell, screen):
+def draw_path(path, start_cell, current_cell, screen):
     cell = path[start_cell]
 
-    while cell != end_cell:
+    while cell != current_cell:
         rect = pygame.Rect(cell.y*BLOCK_SIZE, cell.x*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
-        pygame.draw.rect(screen, colors.ORANGE, rect)
+        pygame.draw.rect(screen, colors.BLUE, rect)
         
         cell = path[cell]
 
 
-def traverse_path(path, start_cell, end_cell, player):
-    cell = path[start_cell]
-
-    while cell != end_cell:
-        player.rect.x, player.rect.y = cell.y * BLOCK_SIZE, cell.x * BLOCK_SIZE
-        cell = path[cell]
-
-def traverse_path_step(path, current_cell, player):
+def traverse_path_step(path, current_cell, player, screen):
     cell = path[current_cell]
+    
+    rect = pygame.Rect(current_cell.y*BLOCK_SIZE, current_cell.x*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
+    pygame.draw.rect(screen, colors.BLUE, rect)
     player.rect.x, player.rect.y = cell.y * BLOCK_SIZE, cell.x * BLOCK_SIZE
     
     return cell
@@ -103,6 +102,7 @@ def run():
 
     running = True
     auto_draw = False
+    done_draw = False
     chosen = False
     
     while running:
@@ -111,33 +111,45 @@ def run():
         for e in pygame.event.get():
             if e.type == pygame.QUIT or e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
                 running = False
-
-        if not auto_draw:
-            move(player, end_rect)
+                maze.save_maze(path=path)
+                pygame.quit()
+                sys.exit(0)
         
-        draw_maze(screen, walls)
+        if running and not done_draw:
+            if not auto_draw:
+                running = not move(player, end_rect, by_hand=True)
         
-        if auto_draw:
-            draw_path(path, start_cell, end_cell, screen)
-            if path_cell != end_cell:
-                path_cell = traverse_path_step(path, path_cell, player)
-            else:
-                auto_draw = False
-
-        draw_endpoints(screen, player.rect, end_rect)
-        pygame.display.flip()
-
-        if not chosen:
-            solvers = [MazeSolverAStar, MazeSolverGreedy]
-            choices = ["A* (automatic)", "Greedy (automatic)", "On my own!"]
-            choice = choices.index(easygui.buttonbox("How do you wanna solve the generated maze?", choices=choices))
-            chosen = True
-
-            if choice != BY_HAND:
-                auto_draw = True
-                start_cell, end_cell, path = solvers[choice](maze).solve()
-                path_cell = start_cell
+            draw_maze(screen, walls)
         
+            if auto_draw:
+                if path_cell != end_cell:
+                    path_cell = traverse_path_step(path, path_cell, player, screen)
+                    start_rect = pygame.Rect(start_cell.y*BLOCK_SIZE, start_cell.x*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
+                
+                    pygame.draw.rect(screen, colors.BLUE, start_rect)
+                    draw_path(path, start_cell, path_cell, screen)
+                else:
+                    auto_draw = False
+                    done_draw = True
+
+        
+            if done_draw:
+                draw_path(path, start_cell, path_cell, screen)
+
+            draw_endpoints(screen, player.rect, end_rect)
+            pygame.display.flip()
+
+            if not chosen:
+                solvers = [MazeSolverAStar, MazeSolverGreedy]
+                choices = ["A* (automatic)", "Greedy (automatic)", "On my own!"]
+                choice = choices.index(easygui.buttonbox("How do you wanna solve the generated maze?", choices=choices))
+                chosen = True
+
+                if choice != BY_HAND:
+                    auto_draw = True
+                    start_cell, end_cell, path = solvers[choice](maze).solve()
+                    path_cell = start_cell
+
         clock.tick(360)
     
     maze.save_maze(path=path)
@@ -146,7 +158,6 @@ def run():
 def main():
     init()
     run()
-    pygame.quit()
 
 
 if __name__ == "__main__":
