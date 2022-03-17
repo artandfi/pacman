@@ -71,7 +71,7 @@ def draw_path(path, start_cell, end_cell, screen):
 
     while cell != end_cell:
         rect = pygame.Rect(cell.y*BLOCK_SIZE, cell.x*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
-        pygame.draw.rect(screen, colors.YELLOW, rect)
+        pygame.draw.rect(screen, colors.ORANGE, rect)
         
         cell = path[cell]
 
@@ -112,13 +112,17 @@ def run():
             if e.type == pygame.QUIT or e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
                 running = False
 
-        move(player, end_rect)
+        if not auto_draw:
+            move(player, end_rect)
+        
         draw_maze(screen, walls)
         
         if auto_draw:
             draw_path(path, start_cell, end_cell, screen)
             if path_cell != end_cell:
                 path_cell = traverse_path_step(path, path_cell, player)
+            else:
+                auto_draw = False
 
         draw_endpoints(screen, player.rect, end_rect)
         pygame.display.flip()
