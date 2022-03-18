@@ -1,5 +1,5 @@
+import os
 import numpy as np
-
 
 from random import randint
 from pygame import Rect
@@ -109,7 +109,7 @@ class Maze:
             pos + 1 if (pos + 1) % self.height != 0 else -1
         ]
     
-    def layout_rgb(self, path=None):
+    def layout_rgb(self, start_cell, end_cell, path=None):
         height, width = len(self.layout), len(self.layout[0])
         layout = np.zeros((height, width, 3), dtype=np.uint8)
 
@@ -121,17 +121,18 @@ class Maze:
                     cell = MazeAStarCell(i, j, True)
                     layout[i][j] = BLUE if path and cell in path else WHITE
         
-        layout[1][1] = GREEN
-        layout[height-2][width-2] = RED
+        layout[start_cell.x][start_cell.y] = GREEN
+        layout[end_cell.x][end_cell.y] = RED
         return layout
 
-    def save_maze(self, file_name="./media/maze.png", scale=3, path=None):
+    def save_maze(self, start_cell, end_cell, file_name="./media/maze.png", scale=3, path=None):
         """Save maze as image file in subdirectory."""
-        Image.fromarray(self.scale_layout(scale, path), "RGB").save(file_name, "png")
+        os.makedirs('media', exist_ok=True)
+        Image.fromarray(self.scale_layout(start_cell, end_cell, scale, path), "RGB").save(file_name, "png")
     
-    def scale_layout(self, scale, path=None):
+    def scale_layout(self, start_cell, end_cell, scale, path=None):
         """Scale maze's layout."""
-        layout = self.layout_rgb(path)
+        layout = self.layout_rgb(start_cell, end_cell, path)
         return layout.repeat(scale, axis=0).repeat(scale, axis=1)
 
 

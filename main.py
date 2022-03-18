@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import pygame
 import colors
 import easygui
@@ -111,7 +112,7 @@ def run():
         for e in pygame.event.get():
             if e.type == pygame.QUIT or e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
                 running = False
-                maze.save_maze(path=path)
+                maze.save_maze(start_cell, end_cell, path=path)
                 pygame.quit()
                 sys.exit(0)
         
@@ -147,12 +148,13 @@ def run():
 
                 if choice != BY_HAND:
                     auto_draw = True
+                    start_time = time.perf_counter()
                     start_cell, end_cell, path = solvers[choice](maze).solve()
+                    end_time = time.perf_counter()
+                    pygame.display.set_caption(pygame.display.get_caption()[0] + " - {:.4f}".format(end_time - start_time) + "s")
                     path_cell = start_cell
 
         clock.tick(360)
-    
-    maze.save_maze(path=path)
 
 
 def main():
