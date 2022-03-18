@@ -71,6 +71,8 @@ def draw_endpoints(screen, player_rect, end_rect):
 
 
 def draw_path(path, start_cell, current_cell, screen):
+    start_rect = pygame.Rect(start_cell.y*BLOCK_SIZE, start_cell.x*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
+    pygame.draw.rect(screen, colors.BLUE, start_rect)
     cell = path[start_cell]
 
     while cell != current_cell:
@@ -125,9 +127,6 @@ def run():
             if auto_draw:
                 if path_cell != end_cell:
                     path_cell = traverse_path_step(path, path_cell, player, screen)
-                    start_rect = pygame.Rect(start_cell.y*BLOCK_SIZE, start_cell.x*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
-                
-                    pygame.draw.rect(screen, colors.BLUE, start_rect)
                     draw_path(path, start_cell, path_cell, screen)
                 else:
                     auto_draw = False
